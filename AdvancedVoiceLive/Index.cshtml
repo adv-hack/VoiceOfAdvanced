@@ -1,0 +1,77 @@
+﻿@if (User.Identity.IsAuthenticated)
+{
+    <header id="shellHeader" class="clearfix">
+        <div id="menuBar">
+            <ul>
+                <li class="menu-header">
+                    <span class="tab-selector">
+                        <a id="menuHome" class="menu-item-content" data-ng-href="/#/Home"><i class="glyphicon glyphicon-home"></i></a>
+                    </span>
+                </li>
+
+                <li class="menu-header" data-ng-class="{selectedtab: menuGroup.showDropDown}"
+                    id="menu{{menuGroup.id}}"
+                    data-ng-repeat="menuGroup in menuGroups" data-ng-click="toggleMenu(menuGroup);">
+
+                    <span class="tab-selector" ng-if="IsStandardMenu(menuGroup.id)">
+                        <a class="menu-item-content" data-ng-bind="menuGroup.id"></a>
+                    </span>
+
+                    <span class="tab-selector" ng-if="IsAdminMenu(menuGroup.id)" ng-click="launchMenu(menuGroup)">
+                        <a class="menu-item-content">
+                            <i class="glyphicon glyphicon-cog"></i>
+                        </a>
+                    </span>
+                    
+                    <span class="tab-selector" ng-if="IsHelpMenu(menuGroup.id)">
+                            <a class="menu-item-content">
+                                <i class="glyphicon glyphicon-question-sign"></i>
+                            </a>
+                        </span>
+
+                    <ul class="menu-dropdown" data-ng-show="menuGroup.showDropDown">
+                        <li data-ng-repeat="menuItem in menuGroup.menuItems"
+                            id="menu{{menuGroup.id}}{{menuItem.id.replace(' ', '')}}"
+                            class="menu-dropdown-item menu-item-content"
+                            data-ng-click="launchMenuItem(menuGroup, menuItem)"
+                            data-ng-bind="menuItem.id">
+
+                            <!-- TODO get username and check security-->
+                        </li>
+                    </ul>
+                </li>
+
+                <li class="menu-header" data-ng-click="toggleUserMenu()">
+                    <span class="tab-selector">
+                        <a id="menu-user" class="menu-item-content" data-ng-href="{{menuGroup.id}}">
+                            <i class="glyphicon glyphicon-user"></i>
+                        </a>
+                    </span>
+
+                    <ul class="menu-dropdown" data-ng-show="showUserDropDown">
+                        <li id="menu-change-password" class="menu-dropdown-item menu-item-content" data-ng-click="changePassword()">
+                            Change Password
+                        </li>
+
+                        <li id="menu-logout" class="menu-dropdown-item menu-item-content" data-ng-click="logout()">
+                            Logout
+                        </li>
+                    </ul>
+                </li>
+                <li class="menu-header">
+                    <fsh-voice-search voice-search-details=""></fsh-voice-search>
+                </li> 
+            </ul>
+        </div>
+    </header>
+
+    <article>
+        <div id="shellContent" data-ng-click="hideMenu()" data-ng-cloak>
+            <div id="viewContainer" class="full-stretch" ng-view></div>
+        </div>
+    </article>
+}
+else
+{
+    Html.RenderPartial("Authentication");
+}

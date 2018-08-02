@@ -1,0 +1,30 @@
+﻿{
+  "keywords": [
+    {
+      "keyword": [
+        "Stock"
+      ],
+      "func" : "openStock"
+    },
+    {
+      "keyword": [
+        "Client"
+      ],
+      "func" : "openClient"
+    },
+    {
+      "keyword": [
+        "Personnel",
+        "Personal"
+      ],
+      "func": "openPersonnel"
+    },
+    {
+      "keyword": [
+        "Search",
+        "Data"
+      ],
+      "func" : "searchData"
+    }
+  ]
+}
