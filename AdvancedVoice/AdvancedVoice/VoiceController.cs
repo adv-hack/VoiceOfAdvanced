@@ -32,7 +32,7 @@ namespace AdvancedVoice
         private SpeechSynthesizer talkBack;
         private bool react;
         private string[] voiceCommands;
-
+        public event PerformAction onUserSpeak;
         /// <summary>
         /// Commands which will follow after Open
         /// </summary>
@@ -48,8 +48,6 @@ namespace AdvancedVoice
             CultureInfo ci = new CultureInfo("en-US");
             recEngine = new SpeechRecognitionEngine(ci);
             talkBack = new SpeechSynthesizer();
-            recEngine.SetInputToDefaultAudioDevice();
-            talkBack.SetOutputToDefaultAudioDevice();
         }
 
         public void TestCallBack()
@@ -57,9 +55,64 @@ namespace AdvancedVoice
             talkBack.Speak("Welcome to Advanced Speech Engine");
         }
 
+        public void TalkBack(string strMessage)
+        {
+            talkBack.SpeakAsync(strMessage);
+        }
+
         public void Initialize()
         {
+            recEngine.SetInputToDefaultAudioDevice();
+            talkBack.SetOutputToDefaultAudioDevice();
+
+            recEngine.SpeechRecognized += RecEngine_SpeechRecognized;
+            TalkBack("Welcome to Advanced Voice Engine");
+        }
+
+        private void RecEngine_SpeechRecognized(object sender, SpeechRecognizedEventArgs e)
+        {
+            var result = e.Result;
+            float conf = e.Result.Confidence;
+            if (conf < 0.60) return;
+            switch (result.Text)
+            {
+                case "One Wakeup":
+                    react = true;
+                    break;
+                case "One Sleep":
+                    react = false;
+                    break;
+            }
+
+            if (react)
+            {
+                var words = result.Words;
+                TalkBack(result.Text);
+                if(words.Count > 1)
+                    onUserSpeak?.Invoke(words[1].Text);
+            }
             
         }
+
+        public void ConfigureGrammar()
+        {
+            if (voiceCommands.Length == 0)
+                throw new Exception("There are no commands for grammer");
+
+            Choices startStopChoices = new Choices(new string[] { "Wakeup", "Sleep" });
+            GrammarBuilder EngineGrammarBuilder = new GrammarBuilder("One");
+            EngineGrammarBuilder.Append(startStopChoices);
+
+            Choices applicationCommands = new Choices(voiceCommands);
+            GrammarBuilder gBuilder = new GrammarBuilder("Open");
+            gBuilder.Append(applicationCommands);
+
+            Choices combinedChoices = new Choices(new GrammarBuilder[] {EngineGrammarBuilder, gBuilder});
+            Grammar grammar = new Grammar((GrammarBuilder)combinedChoices);
+            grammar.Name = "AdvanceVoice";
+
+            recEngine.LoadGrammar(grammar);
+        }
+        
     }
 }
