@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Speech.Recognition;
 using System.Speech.Synthesis;
@@ -11,20 +12,26 @@ using System.Threading.Tasks;
 namespace AdvancedVoice
 {
     //Interface will be implemented in VB client
+    [ComVisible(true)]
     [InterfaceType(ComInterfaceType.InterfaceIsIDispatch)]
     public interface IVoiceActionEvents
     {
-        void UserSpeakCommand(string command);
+        void OnUserSpeakCommand(string command);
     }
 
     public interface IVoiceChoices
     {
-        string[] VoiceChoices { get; set; }
+        void SetVoiceChoices(ref string[] arr);
+        void TestCallBack();
+        void TalkBack(string strMessage);
+        void Initialize();
+        void ConfigureGrammar();
     }
 
-    public delegate void PerformAction(string command);
+    [ComVisible(false)]
+    public delegate void PerformActionDelegate(string command);
 
-    [ComSourceInterfaces("IVoiceActionEvents"),
+    [ComSourceInterfaces(typeof(IVoiceActionEvents)),
         ClassInterface(ClassInterfaceType.None)]
     public class VoiceController : IVoiceChoices
     {
@@ -32,7 +39,7 @@ namespace AdvancedVoice
         private SpeechSynthesizer talkBack;
         private bool react;
         private string[] voiceCommands;
-        public event PerformAction onUserSpeak;
+        public event PerformActionDelegate OnUserSpeakCommand;
         /// <summary>
         /// Commands which will follow after Open
         /// </summary>
@@ -53,6 +60,7 @@ namespace AdvancedVoice
         public void TestCallBack()
         {
             talkBack.Speak("Welcome to Advanced Speech Engine");
+            OnUserSpeakCommand?.Invoke("Himanshu");
         }
 
         public void TalkBack(string strMessage)
@@ -62,11 +70,17 @@ namespace AdvancedVoice
 
         public void Initialize()
         {
-            recEngine.SetInputToDefaultAudioDevice();
-            talkBack.SetOutputToDefaultAudioDevice();
+            try
+            {
+                recEngine.SetInputToDefaultAudioDevice();
+                talkBack.SetOutputToDefaultAudioDevice();
 
-            recEngine.SpeechRecognized += RecEngine_SpeechRecognized;
-            TalkBack("Welcome to Advanced Voice Engine");
+                recEngine.SpeechRecognized += RecEngine_SpeechRecognized;
+                TalkBack("Welcome to Advanced Voice Engine");
+            }catch(Exception e)
+            {
+                throw new Exception("Check microphone and speaker is available and connected");
+            }
         }
 
         private void RecEngine_SpeechRecognized(object sender, SpeechRecognizedEventArgs e)
@@ -88,10 +102,12 @@ namespace AdvancedVoice
             {
                 var words = result.Words;
                 TalkBack(result.Text);
-                if(words.Count > 1)
-                    onUserSpeak?.Invoke(words[1].Text);
+                if (words.Count > 1)
+                {
+                    OnUserSpeakCommand?.Invoke(words[1].Text);
+                }
             }
-            
+
         }
 
         public void ConfigureGrammar()
@@ -113,6 +129,10 @@ namespace AdvancedVoice
 
             recEngine.LoadGrammar(grammar);
         }
-        
+
+        public void SetVoiceChoices(ref string[] arr)
+        {
+            voiceCommands = arr;
+        }
     }
 }
