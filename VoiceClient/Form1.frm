@@ -9,12 +9,28 @@ Begin VB.Form Form1
    ScaleHeight     =   3030
    ScaleWidth      =   4560
    StartUpPosition =   3  'Windows Default
+   Begin VB.CommandButton Command4 
+      Caption         =   "Stop Listening"
+      Height          =   495
+      Left            =   2040
+      TabIndex        =   3
+      Top             =   1800
+      Width           =   1455
+   End
+   Begin VB.CommandButton Command3 
+      Caption         =   "Start Listening"
+      Height          =   495
+      Left            =   360
+      TabIndex        =   2
+      Top             =   1800
+      Width           =   1455
+   End
    Begin VB.CommandButton Command2 
       Caption         =   "Initialize"
       Height          =   495
       Left            =   1920
       TabIndex        =   1
-      Top             =   1800
+      Top             =   1200
       Width           =   1455
    End
    Begin VB.CommandButton Command1 
@@ -22,7 +38,7 @@ Begin VB.Form Form1
       Height          =   495
       Left            =   360
       TabIndex        =   0
-      Top             =   1800
+      Top             =   1200
       Width           =   1455
    End
 End
@@ -37,6 +53,7 @@ Attribute obj.VB_VarHelpID = -1
 
 Private Sub Command1_Click()
 obj.TestCallBack
+
 End Sub
 
 Private Sub Command2_Click()
@@ -46,6 +63,14 @@ Call obj.Initialize
 
 End Sub
 
+Private Sub Command3_Click()
+Call obj.StartListening
+End Sub
+
+Private Sub Command4_Click()
+Call obj.StopListening
+End Sub
+
 Private Sub Form_Load()
 Set obj = New AdvancedVoice.VoiceController
 
@@ -53,7 +78,6 @@ Dim arr(2) As String
 arr(0) = "Call"
 arr(1) = "Client"
 arr(2) = "SOP"
-
 Call obj.SetVoiceChoices(arr)
 End Sub
 

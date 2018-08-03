@@ -26,6 +26,8 @@ namespace AdvancedVoice
         void TalkBack(string strMessage);
         void Initialize();
         void ConfigureGrammar();
+        void StartListening();
+        void StopListening();
     }
 
     [ComVisible(false)]
@@ -92,22 +94,22 @@ namespace AdvancedVoice
             {
                 case "One Wakeup":
                     react = true;
+                    TalkBack("Say a command ");
                     break;
                 case "One Sleep":
                     react = false;
+                    TalkBack("Wake me up, whenever you need");
                     break;
             }
 
             if (react)
             {
                 var words = result.Words;
-                TalkBack(result.Text);
                 if (words.Count > 1)
                 {
                     OnUserSpeakCommand?.Invoke(words[1].Text);
                 }
             }
-
         }
 
         public void ConfigureGrammar()
@@ -133,6 +135,16 @@ namespace AdvancedVoice
         public void SetVoiceChoices(ref string[] arr)
         {
             voiceCommands = arr;
+        }
+
+        public void StartListening()
+        {
+            recEngine.RecognizeAsync(RecognizeMode.Multiple);
+        }
+
+        public void StopListening()
+        {
+            recEngine.RecognizeAsyncStop();
         }
     }
 }
